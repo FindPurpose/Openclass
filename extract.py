@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-
+data = []
 
 class extract_books():
     def __init__(self,url):
@@ -8,23 +8,26 @@ class extract_books():
 
 
     def get_html(self):
+        global data
         page = requests.get(self.url)
+        data.append(self.url)
         return BeautifulSoup(page.content, 'html.parser')
 
 
     def get_info(self):
-        data = []
+        global data
         soup =  self.get_html()
         title = soup.find("li", class_="active")
         data.append(title.string)
         products = soup.find_all("td")
         for product in products:
-            data.append(product.string)
+            if product.string != "Books":
+                data.append(product.string)
         description = soup.find("p",class_="")
         data.append(description.string)
         categorys = soup.find_all("a")
         for category in categorys:
-            if category.string != "Books to Scrape" and category.string != "Home":
+            if category.string != "Books to Scrape" and category.string != "Home" and category.string != "Books":
                 data.append(category.string)
         
         if soup.find("p", class_="star-rating Five"):
