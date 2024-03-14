@@ -8,15 +8,14 @@ class extract_books():
 
 
     def get_html(self):
-        global data
         page = requests.get(self.url)
-        data.append(self.url)
         return BeautifulSoup(page.content, 'html.parser')
 
 
     def get_info(self):
         global data
         soup =  self.get_html()
+        data.append(self.url)
         title = soup.find("li", class_="active")
         data.append(title.string)
         products = soup.find_all("td")
@@ -41,8 +40,7 @@ class extract_books():
         elif soup.find("p", class_="star-rating One"):
             data.append("One stars out of Five")   
         data.append(self.save_img())
-        #It does return but doesn't retun what I want
-        #returns in string in a tuple
+
         return data
 
     def get_img_url(self):
