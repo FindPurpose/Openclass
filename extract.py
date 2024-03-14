@@ -1,18 +1,23 @@
 import requests
 from bs4 import BeautifulSoup
 
+
 class extract_books():
     def __init__(self,url):
         self.url = url
 
-    @staticmethod
-    def split_html(self, url):
-        page = requests.get(url)
-        return BeautifulSoup(page.content, 'html.parser') 
+
+    def get_html(self):
+        page = requests.get(self.url)
+        print (BeautifulSoup(page.content, 'html.parser'))
+
+
+
+    
     
 
 extract = extract_books("https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html")
-print (extract.split_html)
+print (extract.get_html())
 
 """
 class extract_cat():
