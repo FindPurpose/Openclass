@@ -55,9 +55,40 @@ class extract_books():
         return url
     
 
+class extract_cat():
+    def __init__(self, url):
+        self.url = url
+
+    def get_html(self):
+        page = requests.get(self.url)
+        return BeautifulSoup(page.content, 'html.parser')
+
+    def extract_url_book(self, url):
+        soup =  self.get_html()
+        if soup.find("li", class_="next"):
+            return next_page()
+
+
+
+    def extract_book(self, url):
+        url = self.url + url
+        extract = extract_books(url)
+        return (extract.get_info())
+    
+    def next_page(self):
+        soup =  self.get_html()
+        page_url = soup.find("li", class_="next").findChild().get("href")
+        return self.url + page_url
+        
+"""
+the original url has index.html. But you actually dont need that part for the website to go through. So would it be better to take of index.html or just try to take it off everytime?
+"""
+
+
+
 def main():
-    extract = extract_books("https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html")
-    print (extract.get_info())
+    extract = extract_cat("https://books.toscrape.com/catalogue/category/books/add-a-comment_18/index.html")
+    print (extract())
 
 """
 useful for finding the url for the catergory 
@@ -68,6 +99,7 @@ useful for finding the url for the catergory
 
 
 """
+Get the list, unlock the list, then get a href.
 class extract_cat():
     def __init__(self, url):
         self.url = url
