@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlsplit, urlparse
+total_data = []
 
 class extract_books():
     def __init__(self,url):
@@ -14,6 +15,7 @@ class extract_books():
 
 
     def get_info(self):
+        global total_data
         soup =  self.get_html()
         self.data.append(self.url)
         title = soup.find("h1")
@@ -41,8 +43,13 @@ class extract_books():
         elif soup.find("p", class_="star-rating One"):
             self.data.append("One stars out of Five")   
         self.data.append(self.save_img())
-
-        return self.data
+        self.add_datas()
+        return total_data
+    
+    def add_datas(self):
+        global total_data
+        total_data.append(self.data)
+        return total_data
 
     def get_img_url(self):
         soup =  self.get_html()
@@ -75,16 +82,12 @@ class extract_cat():
                     r1 = urlsplit(self.url)
                     # print(r1.geturl())
                     url = urljoin(self.url, book_url)
-                    # print(url)
+                    print(url)
                     return self.extract_book(url)
         next_page = self.next_page()     
         if (next_page):
             extract = extract_cat(next_page)
             return(extract.extract_url_book())
-
-        """
-        This thing has to book because it there is another one it should be able to loop the pages.
-        """
 
 
     def extract_book(self, url):
@@ -97,10 +100,6 @@ class extract_cat():
             page_url = soup.find("li", class_="next").findChild().get("href")
             url = urljoin(self.url, page_url)
             return url
-        
-"""
-the original url has index.html. But you actually dont need that part for the website to go through. So would it be better to take of index.html or just try to take it off everytime?
-"""
 
 
 
