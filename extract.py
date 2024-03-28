@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from urllib.parse import urljoin, urlsplit
 data = []
 
 class extract_books():
@@ -16,13 +17,14 @@ class extract_books():
         global data
         soup =  self.get_html()
         data.append(self.url)
-        title = soup.find("li", class_="active")
+        title = soup.find("h1")
+        # print(title.string)
         data.append(title.string)
         products = soup.find_all("td")
         for product in products:
             if product.string != "Books":
                 data.append(product.string)
-        description = soup.find("p",class_="")
+        description = soup.find("p",class_=False)
         data.append(description.string)
         categorys = soup.find_all("a")
         for category in categorys:
@@ -63,22 +65,38 @@ class extract_cat():
         page = requests.get(self.url)
         return BeautifulSoup(page.content, 'html.parser')
 
-    def extract_url_book(self, url):
+    def extract_url_book(self):
         soup =  self.get_html()
-        if soup.find("li", class_="next"):
-            return next_page()
-
+        books = soup.find_all("li", class_="col-xs-6 col-sm-4 col-md-3 col-lg-3")
+        for lists in books:
+            for url in lists:
+                anchor = url.find("a")
+                if anchor != -1:
+                    book_url = anchor.get("href")
+                    r1 = urlsplit(self.url)
+                    print(r1.geturl())
+                    url = urljoin(self.url, book_url)
+                    print(url)
+                    self.extract_book(url)
+                    
+        
+        self.next_page()
+        """
+        This thing has to book because it there is another one it should be able to loop the pages.
+        """
 
 
     def extract_book(self, url):
-        url = self.url + url
         extract = extract_books(url)
         return (extract.get_info())
     
     def next_page(self):
         soup =  self.get_html()
-        page_url = soup.find("li", class_="next").findChild().get("href")
-        return self.url + page_url
+        if soup.find("li", class_="next"):
+            page_url = soup.find("li", class_="next").findChild().get("href")
+            return urljoin(self.url, page_url)
+        else:
+            return self.url
         
 """
 the original url has index.html. But you actually dont need that part for the website to go through. So would it be better to take of index.html or just try to take it off everytime?
@@ -88,7 +106,7 @@ the original url has index.html. But you actually dont need that part for the we
 
 def main():
     extract = extract_cat("https://books.toscrape.com/catalogue/category/books/add-a-comment_18/index.html")
-    print (extract())
+    print (extract.extract_url_book())
 
 """
 useful for finding the url for the catergory 
