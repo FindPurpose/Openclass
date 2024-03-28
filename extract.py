@@ -74,13 +74,15 @@ class extract_cat():
                 if anchor != -1:
                     book_url = anchor.get("href")
                     r1 = urlsplit(self.url)
-                    print(r1.geturl())
+                    # print(r1.geturl())
                     url = urljoin(self.url, book_url)
-                    print(url)
+                    # print(url)
                     self.extract_book(url)
-                    
-        
-        self.next_page()
+        next_page = self.next_page()     
+        if (next_page):
+            extract = extract_cat(next_page)
+            return(extract.extract_url_book())
+
         """
         This thing has to book because it there is another one it should be able to loop the pages.
         """
@@ -94,9 +96,8 @@ class extract_cat():
         soup =  self.get_html()
         if soup.find("li", class_="next"):
             page_url = soup.find("li", class_="next").findChild().get("href")
-            return urljoin(self.url, page_url)
-        else:
-            return self.url
+            url = urljoin(self.url, page_url)
+            return url
         
 """
 the original url has index.html. But you actually dont need that part for the website to go through. So would it be better to take of index.html or just try to take it off everytime?
