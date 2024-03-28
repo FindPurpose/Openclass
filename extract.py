@@ -1,11 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin, urlsplit
-data = []
+from urllib.parse import urljoin, urlsplit, urlparse
 
 class extract_books():
     def __init__(self,url):
         self.url = url
+        self.data = []
 
 
     def get_html(self):
@@ -14,36 +14,35 @@ class extract_books():
 
 
     def get_info(self):
-        global data
         soup =  self.get_html()
-        data.append(self.url)
+        self.data.append(self.url)
         title = soup.find("h1")
         # print(title.string)
-        data.append(title.string)
+        self.data.append(title.string)
         products = soup.find_all("td")
         for product in products:
             if product.string != "Books":
-                data.append(product.string)
+                self.data.append(product.string)
         description = soup.find("p",class_=False)
-        data.append(description.string)
-        categorys = soup.find_all("a")
+        self.data.append(description.string)
+        categorys = soup.find_all("li", class_=False, href=False)
         for category in categorys:
-            if category.string != "Books to Scrape" and category.string != "Home" and category.string != "Books":
-                data.append(category.string)
+            if (category.findChild().string != "Home" and category.findChild().string != "Books"):
+                self.data.append(category.findChild().string)
         
         if soup.find("p", class_="star-rating Five"):
-            data.append("Five stars out of Five")
+            self.data.append("Five stars out of Five")
         elif soup.find("p", class_="star-rating Four"):
-            data.append("Three stars out of Five")
+            self.data.append("Three stars out of Five")
         elif soup.find("p", class_="star-rating Three"):
-            data.append("Three stars out of Five")   
+            self.data.append("Three stars out of Five")   
         elif soup.find("p", class_="star-rating Two"):
-            data.append("Two stars out of Five")  
+            self.data.append("Two stars out of Five")  
         elif soup.find("p", class_="star-rating One"):
-            data.append("One stars out of Five")   
-        data.append(self.save_img())
+            self.data.append("One stars out of Five")   
+        self.data.append(self.save_img())
 
-        return data
+        return self.data
 
     def get_img_url(self):
         soup =  self.get_html()
@@ -53,7 +52,7 @@ class extract_books():
     def save_img(self):
         image = self.get_img_url()
         # url = self.url + image
-        url = "https://books.toscrape.com/" + image
+        url = urljoin('https://books.toscrape.com/', image)
         return url
     
 
@@ -77,7 +76,7 @@ class extract_cat():
                     # print(r1.geturl())
                     url = urljoin(self.url, book_url)
                     # print(url)
-                    self.extract_book(url)
+                    return self.extract_book(url)
         next_page = self.next_page()     
         if (next_page):
             extract = extract_cat(next_page)
