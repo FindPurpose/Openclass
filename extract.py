@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlsplit, urlparse
-total_data = []
 
 class extract_books():
     def __init__(self,url):
@@ -15,7 +14,6 @@ class extract_books():
 
 
     def get_info(self):
-        global total_data
         soup =  self.get_html()
         self.data.append(self.url)
         title = soup.find("h1")
@@ -43,13 +41,9 @@ class extract_books():
         elif soup.find("p", class_="star-rating One"):
             self.data.append("One stars out of Five")   
         self.data.append(self.save_img())
-        self.add_datas()
-        return total_data
+        return self.data
     
-    def add_datas(self):
-        global total_data
-        total_data.append(self.data)
-        return total_data
+
 
     def get_img_url(self):
         soup =  self.get_html()
@@ -66,6 +60,7 @@ class extract_books():
 class extract_cat():
     def __init__(self, url):
         self.url = url
+        self.total_books = []
 
     def get_html(self):
         page = requests.get(self.url)
@@ -79,15 +74,16 @@ class extract_cat():
                 anchor = url.find("a")
                 if anchor != -1:
                     book_url = anchor.get("href")
-                    r1 = urlsplit(self.url)
-                    # print(r1.geturl())
-                    url = urljoin(self.url, book_url)
-                    print(url)
-                    return self.extract_book(url)
+                    urls = urljoin(self.url, book_url)
+                    url_list = urls.split('\n')
+                    for url in url_list:
+                        self.total_books.append(self.extract_book(url))
+                        
         next_page = self.next_page()     
         if (next_page):
             extract = extract_cat(next_page)
-            return(extract.extract_url_book())
+            self.total_books.extend(extract.extract_url_book())
+        return self.total_books
 
 
     def extract_book(self, url):
