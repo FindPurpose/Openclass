@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from collections import OrderedDict
 from urllib.parse import urljoin, urlsplit, urlparse
 
 class extract_books():
@@ -17,14 +18,17 @@ class extract_books():
         soup =  self.get_html()
         self.data.append(self.url)
         title = soup.find("h1")
-        # print(title.string)
+        print(title.string)
         self.data.append(title.string)
         products = soup.find_all("td")
         for product in products:
             if product.string != "Books":
                 self.data.append(product.string)
-        description = soup.find("p",class_=False)
-        self.data.append(description.string)
+        description = soup.find("p",class_=False, href=False)
+        if description is not None:
+            self.data.append(description.string)
+        else:
+            self.data.append("No description")
         categorys = soup.find_all("li", class_=False, href=False)
         for category in categorys:
             if (category.findChild().string != "Home" and category.findChild().string != "Books"):
@@ -98,33 +102,49 @@ class extract_cat():
             return url
 
 
+class get_all_books():
+    def __init__(self, url):
+        self.url = url
+        self.total_cat = []
 
-def main():
-    extract = extract_cat("https://books.toscrape.com/catalogue/category/books/add-a-comment_18/index.html")
-    print (extract.extract_url_book())
+    def get_html(self):
+        page = requests.get(self.url)
+        return BeautifulSoup(page.content, 'html.parser')
+    
+    def extract_category(self):
+        total_cat = []
+        soup = self.get_html()
+        categorys = soup.find_all("li", class_=False)
+        for category in categorys:
+            url_cats = category.find_all("a", class_=False)
+            for url_cat in url_cats:
+                if url_cat['href'] != "index.html" and url_cat['href'] != "catalogue/category/books_1/index.html":
+                    url_cate = url_cat['href']
+                    urls = urljoin(self.url, url_cate)
+                    self.total_cat.append(self.extract_cat(urls))
+        self.total_cat = list(OrderedDict.fromkeys(self.total_cat))
+        return(self.total_cat)
+
+
+    def extract_cat(self, url):
+        extract = extract_cat(url)
+        return extract.extract_url_book()
 
 """
 useful for finding the url for the catergory 
         categorys = soup.find_all("a")
         for category in categorys:
             print(category['href'])
-"""
-
-
-"""
-Get the list, unlock the list, then get a href.
-class extract_cat():
-    def __init__(self, url):
-        self.url = url
-
-    
-
-
 
 url = "https://books.toscrape.com/"
 page = requests.get(url)
 soup = BeautifulSoup(page.content, 'html.parser')
 """    
+
+def main():
+    extract = get_all_books("https://books.toscrape.com/index.html")
+    print(extract.extract_category())
+
 
 if __name__ == "__main__":
     main()
