@@ -18,7 +18,7 @@ class extract_books():
         soup =  self.get_html()
         self.data.append(self.url)
         title = soup.find("h1")
-        print(title.string)
+        #print(title.string)
         self.data.append(title.string)
         products = soup.find_all("td")
         for product in products:
@@ -129,17 +129,6 @@ class get_all_books():
     def extract_cat(self, url):
         extract = extract_cat(url)
         return extract.extract_url_book()
-
-"""
-useful for finding the url for the catergory 
-        categorys = soup.find_all("a")
-        for category in categorys:
-            print(category['href'])
-
-url = "https://books.toscrape.com/"
-page = requests.get(url)
-soup = BeautifulSoup(page.content, 'html.parser')
-"""    
 
 def main():
     extract = get_all_books("https://books.toscrape.com/index.html")
