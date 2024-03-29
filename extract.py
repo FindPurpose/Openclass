@@ -112,7 +112,6 @@ class get_all_books():
         return BeautifulSoup(page.content, 'html.parser')
     
     def extract_category(self):
-        total_cat = []
         soup = self.get_html()
         categorys = soup.find_all("li", class_=False)
         for category in categorys:
@@ -122,13 +121,19 @@ class get_all_books():
                     url_cate = url_cat['href']
                     urls = urljoin(self.url, url_cate)
                     self.total_cat.append(self.extract_cat(urls))
+        self.total_cat = [item for sublist in self.total_cat for item in sublist]
         self.total_cat = list(OrderedDict.fromkeys(self.total_cat))
         return(self.total_cat)
-
 
     def extract_cat(self, url):
         extract = extract_cat(url)
         return extract.extract_url_book()
+"""
+Error - line 125, in extract_category
+    self.total_cat = list(OrderedDict.fromkeys(self.total_cat))
+TypeError: unhashable type: 'list'
+And also looks like its the final part. why does the list thing happen when its near the end?
+"""
 
 def main():
     extract = get_all_books("https://books.toscrape.com/index.html")
