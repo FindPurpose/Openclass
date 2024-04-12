@@ -46,8 +46,6 @@ class extract_books():
             self.data.append("One stars out of Five")   
         self.data.append(self.save_img())
         return self.data
-    
-
 
     def get_img_url(self):
         soup =  self.get_html()
@@ -83,12 +81,12 @@ class extract_cat():
                     for url in url_list:
                         self.total_books.append(self.extract_book(url))
                         
-        next_page = self.next_page()     
+        next_page = self.next_page() 
         if (next_page):
             extract = extract_cat(next_page)
             self.total_books.extend(extract.extract_url_book())
         return self.total_books
-
+        """ Turn it into loop first"""
 
     def extract_book(self, url):
         extract = extract_books(url)
@@ -113,27 +111,22 @@ class get_all_books():
     
     def extract_category(self):
         soup = self.get_html()
-        categorys = soup.find_all("li", class_=False)
+        categorys = soup.find_all("ul", class_=False)
         for category in categorys:
             url_cats = category.find_all("a", class_=False)
             for url_cat in url_cats:
                 if url_cat['href'] != "index.html" and url_cat['href'] != "catalogue/category/books_1/index.html":
                     url_cate = url_cat['href']
+                    print(url_cat.string)
                     urls = urljoin(self.url, url_cate)
-                    self.total_cat.append(self.extract_cat(urls))
-        self.total_cat = [item for sublist in self.total_cat for item in sublist]
-        self.total_cat = list(OrderedDict.fromkeys(self.total_cat))
+                    self.total_cat.append(self.extract_cate(urls))
+        print("Phase 3 Done")
         return(self.total_cat)
 
-    def extract_cat(self, url):
+    def extract_cate(self, url):
         extract = extract_cat(url)
         return extract.extract_url_book()
-"""
-Error - line 125, in extract_category
-    self.total_cat = list(OrderedDict.fromkeys(self.total_cat))
-TypeError: unhashable type: 'list'
-And also looks like its the final part. why does the list thing happen when its near the end?
-"""
+
 
 def main():
     extract = get_all_books("https://books.toscrape.com/index.html")
