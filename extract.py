@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 from urllib.parse import urljoin, urlsplit, urlparse
+category_list =[]
 
 class extract_books():
     def __init__(self,url):
@@ -54,7 +55,6 @@ class extract_books():
     
     def save_img(self):
         image = self.get_img_url()
-        # url = self.url + image
         url = urljoin('https://books.toscrape.com/', image)
         return url
     
@@ -111,26 +111,40 @@ class get_all_books():
     
     def extract_category(self):
         soup = self.get_html()
+        self.get_cat()
         categorys = soup.find_all("ul", class_=False)
         for category in categorys:
             url_cats = category.find_all("a", class_=False)
             for url_cat in url_cats:
-                if url_cat['href'] != "index.html" and url_cat['href'] != "catalogue/category/books_1/index.html":
-                    url_cate = url_cat['href']
-                    print(url_cat.string)
-                    urls = urljoin(self.url, url_cate)
-                    self.total_cat.append(self.extract_cate(urls))
-        print("Phase 3 Done")
+                url_cate = url_cat['href']
+                urls = urljoin(self.url, url_cate)
+                self.total_cat.append(self.extract_cate(urls))
         return(self.total_cat)
 
+    def get_cat(self):
+        global category_list
+        soup = self.get_html()
+        categorys = soup.find_all("ul", class_=False)
+        for category in categorys:
+            url_cats = category.find_all("a", class_=False)
+            for url_cat in url_cats:
+                data = url_cat.string.replace("\n", "").replace(" ", "")
+                category_list.append(data)
+        return category_list
+                
     def extract_cate(self, url):
         extract = extract_cat(url)
         return extract.extract_url_book()
 
+import pandas as pd
 
 def main():
-    extract = get_all_books("https://books.toscrape.com/index.html")
-    print(extract.extract_category())
+    """extract = extract_cat("https://books.toscrape.com/catalogue/category/books/travel_2/index.html")
+    #print(extract.extract_url_book)
+    datas = pd.DataFrame(extract.extract_url_book())
+    datas = datas.to_csv("test.csv", index=False)
+    print(datas)"""
+    
 
 
 if __name__ == "__main__":
