@@ -2,13 +2,16 @@ import requests
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 from urllib.parse import urljoin, urlsplit, urlparse
+from pathlib import Path
+from PIL import Image
 cat_list =[]
+    
 
 class extract_books():
     def __init__(self,url):
         self.url = url
         self.data = []
-
+        
 
     def get_html(self):
         page = requests.get(self.url)
@@ -16,6 +19,8 @@ class extract_books():
 
 
     def get_info(self):
+        IMAGES_PATH = Path() / "images" / "Books"
+        IMAGES_PATH.mkdir(parents=True, exist_ok=True)
         soup =  self.get_html()
         self.data.append(self.url)
         title = soup.find("h1")
@@ -44,8 +49,14 @@ class extract_books():
         elif soup.find("p", class_="star-rating Two"):
             self.data.append("Two stars out of Five")  
         elif soup.find("p", class_="star-rating One"):
-            self.data.append("One stars out of Five")   
-        self.data.append(self.save_img())
+            self.data.append("One stars out of Five")  
+        image_url = self.save_img() 
+        self.data.append(image_url)
+        response = requests.get(image_url, stream=True)
+        if response.status_code == 200:
+            file_path = IMAGES_PATH / f"{title.string}.jpg" 
+            with open(file_path, "wb") as file:
+                file.write(response.content)
         return self.data
 
     def get_img_url(self):
@@ -58,6 +69,9 @@ class extract_books():
         url = urljoin('https://books.toscrape.com/', image)
         return url
     
+
+    
+
 
 class extract_cat():
     def __init__(self, url):
