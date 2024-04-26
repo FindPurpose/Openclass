@@ -70,8 +70,6 @@ class extract_books():
         return url
     
 
-    
-
 
 class extract_cat():
     def __init__(self, url):
@@ -100,7 +98,6 @@ class extract_cat():
             extract = extract_cat(next_page)
             self.total_books.extend(extract.extract_url_book())
         return self.total_books
-        """ Turn it into loop first"""
 
     def extract_book(self, url):
         extract = extract_books(url)
@@ -139,20 +136,3 @@ class get_all_books():
     def extract_cate(self, url):
         extract = extract_cat(url)
         return extract.extract_url_book()
-
-import pandas as pd
-
-def main():
-    global cat_list
-    print(cat_list)
-    """extract = extract_cat("https://books.toscrape.com/catalogue/category/books/travel_2/index.html")
-    #print(extract.extract_url_book)
-    datas = pd.DataFrame(extract.extract_url_book())
-    datas = datas.to_csv("test.csv", index=False)
-    print(datas)"""
-    
-    
-
-
-if __name__ == "__main__":
-    main()
