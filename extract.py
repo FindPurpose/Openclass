@@ -53,11 +53,8 @@ class extract_books():
         image_url = self.save_img() 
         self.data.append(image_url)
         response = requests.get(image_url, stream=True)
-        print(image_url)
         if response.status_code == 200:
-            file_path = IMAGES_PATH / (title.string.replace(":","")+".jpg") 
-            print(title.string)
-            print(file_path)
+            file_path = IMAGES_PATH / (title.string.replace(":","").replace("/", "").replace("\"", "").replace("*"," ").replace("?", "")+".jpg") 
             with open(file_path, "wb") as file:
                 file.write(response.content)
         return self.data
